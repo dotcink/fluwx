@@ -6,7 +6,6 @@ import android.graphics.Bitmap.CompressFormat
 import android.graphics.BitmapFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okio.*
 import top.zibin.luban.Luban
 import java.io.*
 import java.util.*
@@ -34,9 +33,9 @@ class ImagesIOIml(override val image: WeChatFile) : ImagesIO {
                 .get(originFile.absolutePath)
 
         if (compressedFile.length() < maxSize) {
-            val source = compressedFile.source()
-            val bufferedSource = source.buffer()
-            val bytes = bufferedSource.readByteArray()
+            val source = compressedFile.inputStream()
+            val bufferedSource = source
+            val bytes = bufferedSource.readBytes()
             source.close()
             bufferedSource.close()
             bytes
@@ -49,9 +48,9 @@ class ImagesIOIml(override val image: WeChatFile) : ImagesIO {
         val file = File.createTempFile(UUID.randomUUID().toString(), image.suffix)
 
         val outputStream: OutputStream = FileOutputStream(file)
-        val sink = outputStream.sink().buffer()
-        val source = inputStream.source()
-        sink.writeAll(source)
+        val sink = outputStream
+        val source = inputStream
+        sink.write(source.readBytes())
         source.close()
         sink.close()
 
@@ -100,10 +99,10 @@ class ImagesIOIml(override val image: WeChatFile) : ImagesIO {
 
         bitmap.recycle()
 
-        val source = inputStream.source()
-        val bufferedSource = source.buffer()
+        val source = inputStream
+        val bufferedSource = source
         try {
-            result = bufferedSource.readByteArray()
+            result = bufferedSource.readBytes()
             source.close()
             bufferedSource.close()
         } catch (e: IOException) {

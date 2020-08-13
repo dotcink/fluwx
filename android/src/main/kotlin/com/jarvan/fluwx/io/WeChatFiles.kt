@@ -6,12 +6,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okio.BufferedSource
-import okio.buffer
-import okio.source
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.io.InputStream
 
 /***
  * Created by mo on 2020/5/13
@@ -31,10 +29,10 @@ class WeChatFileFile(override val source: Any, override val suffix: String) : We
     }
 
     override suspend fun readByteArray(): ByteArray = withContext(Dispatchers.IO) {
-        var source: BufferedSource? = null
+        var source: InputStream? = null
         try {
-            source = internalSource.source().buffer()
-            val array = source.readByteArray()
+            source = internalSource.inputStream()
+            val array = source.readBytes()
             array
         } catch (e: FileNotFoundException) {
             byteArrayOf()
@@ -57,10 +55,10 @@ private class WeChatAssetFile(override val source: Any, override val suffix: Str
     }
 
     override suspend fun readByteArray(): ByteArray = withContext(Dispatchers.IO) {
-        var source: BufferedSource? = null
+        var source: InputStream? = null
         try {
-            source = internalSource.createInputStream().source().buffer()
-            val array = source.readByteArray()
+            source = internalSource.createInputStream()
+            val array = source.readBytes()
             array
         } catch (e: FileNotFoundException) {
             byteArrayOf()
@@ -87,7 +85,7 @@ private class WeChatNetworkFile(override val source: Any, override val suffix: S
         val request: Request = Request.Builder().url(internalSource).get().build()
         try {
             val response = okHttpClient.newCall(request).execute()
-            val responseBody = response.body
+            val responseBody = response.body()
             if (response.isSuccessful && responseBody != null) {
                 responseBody.bytes()
             } else {

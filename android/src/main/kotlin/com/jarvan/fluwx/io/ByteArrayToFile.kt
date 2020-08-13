@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okio.*
 import java.io.*
 import java.util.*
 
@@ -43,17 +42,17 @@ internal suspend fun ByteArray.toCacheFile(context: Context, suffix: String): Fi
 private suspend fun saveToLocal(byteArray: ByteArray, file: File): File? {
     return withContext(Dispatchers.IO) {
 
-        var sink: BufferedSink? = null
-        var source: Source? = null
+        var sink: OutputStream? = null
+        var source: InputStream? = null
         var outputStream: OutputStream? = null
 
         try {
 
 
             outputStream = FileOutputStream(file)
-            sink = outputStream.sink().buffer()
-            source = ByteArrayInputStream(byteArray).source()
-            sink.writeAll(source)
+            sink = outputStream
+            source = ByteArrayInputStream(byteArray)
+            sink.write(source.readBytes())
             sink.flush()
 
         } catch (e: IOException) {
