@@ -4,7 +4,7 @@
 
 #import <Flutter/Flutter.h>
 #import "FluwxStringUtil.h"
-#import <WechatSDK/WXApiObject.h>
+#import <WechatOpenSDK/WXApiObject.h>
 #import "FluwxResponseHandler.h"
 
 @implementation FluwxResponseHandler
